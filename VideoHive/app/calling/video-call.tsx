@@ -139,11 +139,11 @@ export default function VideoCallScreen() {
     try {
       await pressFriend();
       Alert.alert(
-        '💖 Friendship vibes sent!',
-        'If they're feeling the connection too, you\'ll become friends and can keep chatting! ✨'
+        'Friendship vibes sent!',
+        'If they feel the connection too, you will become friends and can keep chatting!'
       );
     } catch (error: any) {
-      Alert.alert('Oops! 😅', error.message || 'Failed to send friend request');
+      Alert.alert('Oops!', error.message || 'Failed to send friend request');
     }
   };
 
