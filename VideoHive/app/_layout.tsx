@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { View, Text } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
@@ -14,7 +15,13 @@ export default function RootLayout() {
   }, []);
 
   if (isLoading) {
-    return null; // Show loading screen in production
+    return (
+      <View style={{ flex: 1, backgroundColor: '#FAFBFF', justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 48, marginBottom: 16 }}>🎉</Text>
+        <Text style={{ fontSize: 24, fontWeight: '800', color: '#2D1B69', marginBottom: 8 }}>ChillConnect</Text>
+        <Text style={{ fontSize: 16, color: '#6B46C1' }}>Loading your vibe... ✨</Text>
+      </View>
+    );
   }
 
   return (

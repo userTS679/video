@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -21,12 +21,15 @@ import {
   Flag,
   Gamepad2,
   MessageCircle,
+  Sparkles,
 } from 'lucide-react-native';
 import { useCallStore } from '@/store/callStore';
 import { useGameStore } from '@/store/gameStore';
 import { generateIcebreakers } from '@/lib/groq';
+import { VideoCallView } from '@/components/VideoCallView';
 
 export default function VideoCallScreen() {
+  const videoCallRef = useRef<any>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [showReady, setShowReady] = useState(true);
@@ -34,14 +37,19 @@ export default function VideoCallScreen() {
   const [showGameMenu, setShowGameMenu] = useState(false);
   const [currentIcebreaker, setCurrentIcebreaker] = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const [callDuration, setCallDuration] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
   
   const {
     currentCall,
     connectedUser,
     friendPressed,
+    otherUserFriendPressed,
     endCall,
     pressFriend,
     reportUser,
+    channelName,
+    agoraToken,
   } = useCallStore();
   
   const { startGame, isGameActive, gameType } = useGameStore();
@@ -50,31 +58,63 @@ export default function VideoCallScreen() {
     // Load initial icebreaker
     loadIcebreaker();
     
-    // Simulate ready state after 3 seconds (in real app, wait for actual video ready)
-    const timer = setTimeout(() => {
-      setBothReady(true);
-      setShowReady(false);
-    }, 3000);
+    // Start call duration timer when connected
+    let timer: NodeJS.Timeout;
+    if (isConnected) {
+      timer = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+    }
 
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isConnected]);
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleUserJoined = (uid: number) => {
+    setIsConnected(true);
+    setBothReady(true);
+    setShowReady(false);
+  };
+
+  const handleUserLeft = (uid: number) => {
+    setIsConnected(false);
+    Alert.alert(
+      'User Left',
+      'The other person has left the call.',
+      [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
+    );
+  };
+
+  const handleCallError = (error: any) => {
+    Alert.alert(
+      'Call Error',
+      'There was an issue with the video call. Please try again.',
+      [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
+    );
+  };
 
   const loadIcebreaker = async () => {
-    if (!connectedUser) return;
+    // For now, use predefined college-friendly icebreakers
+    const collegeIcebreakers = [
+      "What's your major and what made you choose it? 📚",
+      "If you could have any superpower during exams, what would it be? ⚡",
+      "What's the most interesting class you've taken this semester? 🤔",
+      "Coffee or tea to survive those late-night study sessions? ☕",
+      "What's your go-to stress relief activity during finals? 😅",
+      "If you could swap lives with any fictional character for a day, who would it be? 🎭",
+      "What's your favorite campus spot to hang out? 🏫",
+      "What song always gets you hyped up? 🎵"
+    ];
     
-    try {
-      const response = await generateIcebreakers({
-        userAInterests: ['music', 'gaming'], // In real app, get from user profile
-        userBInterests: ['movies', 'travel'], // In real app, get from connected user profile
-      });
-      
-      if (response.icebreakers.length > 0) {
-        setCurrentIcebreaker(response.icebreakers[0]);
-      }
-    } catch (error) {
-      console.error('Error loading icebreaker:', error);
-      setCurrentIcebreaker("What's your favorite way to spend a weekend?");
-    }
+    const randomIcebreaker = collegeIcebreakers[Math.floor(Math.random() * collegeIcebreakers.length)];
+    setCurrentIcebreaker(randomIcebreaker);
   };
 
   const handleEndCall = () => {
@@ -99,12 +139,30 @@ export default function VideoCallScreen() {
     try {
       await pressFriend();
       Alert.alert(
-        'Friend Request Sent!',
-        'If they also press the heart button, you\'ll become friends and can chat later.'
+        '💖 Friendship vibes sent!',
+        'If they're feeling the connection too, you\'ll become friends and can keep chatting! ✨'
       );
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to send friend request');
+      Alert.alert('Oops! 😅', error.message || 'Failed to send friend request');
     }
+  };
+
+  const toggleMute = () => {
+    if (isMuted) {
+      videoCallRef.current?.unmuteAudio();
+    } else {
+      videoCallRef.current?.muteAudio();
+    }
+    setIsMuted(!isMuted);
+  };
+
+  const toggleVideo = () => {
+    if (isVideoOff) {
+      videoCallRef.current?.unmuteVideo();
+    } else {
+      videoCallRef.current?.muteVideo();
+    }
+    setIsVideoOff(!isVideoOff);
   };
 
   const handleStartGame = async (gameType: 'rock_paper_scissors' | 'trivia' | 'emoji_guess') => {
