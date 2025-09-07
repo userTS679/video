@@ -12,7 +12,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     initialize();
-  }, []);
+  }, [initialize]);
 
   if (isLoading) {
     return (

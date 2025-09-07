@@ -114,6 +114,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     try {
+      set({ isLoading: true });
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
@@ -124,9 +125,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .eq('id', session.user.id)
           .single();
 
-        if (error) {
-          console.error('Error fetching profile:', error);
-        } else if (profile) {
+        if (!error && profile) {
           set({ 
             user: profile, 
             isAuthenticated: true,
@@ -136,6 +135,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       }
       
+      // No valid session or profile found
       set({ 
         user: null, 
         isAuthenticated: false,
@@ -143,7 +143,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch (error) {
       console.error('Initialize error:', error);
-      set({ isLoading: false });
+      set({ 
+        user: null, 
+        isAuthenticated: false,
+        isLoading: false 
+      });
     }
   },
 }));
