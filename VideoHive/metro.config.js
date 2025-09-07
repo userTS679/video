@@ -8,14 +8,15 @@ config.resolver.platforms = ['ios', 'android', 'native', 'web'];
 
 // Configure path aliases to resolve @/ imports
 config.resolver.alias = {
-  '@': path.resolve(__dirname, './'),
+  '@': path.resolve(__dirname, '.'),
 };
 
-// Configure for Replit proxy compatibility
-config.server = {
-  ...config.server,
-  host: '0.0.0.0',
-  port: 5000,
-};
+// Ensure TypeScript files are resolved properly
+config.resolver.sourceExts.push('ts', 'tsx');
+
+// Add node_modules to the resolver
+config.resolver.nodeModulesPaths = [
+  path.resolve(__dirname, 'node_modules'),
+];
 
 module.exports = config;
