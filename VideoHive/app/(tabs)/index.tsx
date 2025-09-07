@@ -102,21 +102,32 @@ export default function HomeScreen() {
 
   const handleStartCall = async () => {
     if (!user) {
-      Alert.alert('Error', 'Please sign in first');
+      Alert.alert('Not Signed In', 'Please sign in first to start video calling!');
       return;
     }
 
     try {
-      const filters = {
-        interests: selectedInterests,
-        genders: selectedGenders,
-        ageRange,
-      };
-
-      await startSearch(filters);
-      router.push('/calling/search');
+      Alert.alert(
+        'Starting Video Call Search! 🚀', 
+        'Finding someone awesome to chat with...',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Let\'s Go!', 
+            onPress: async () => {
+              const filters = {
+                interests: selectedInterests,
+                genders: selectedGenders,
+                ageRange,
+              };
+              await startSearch(filters);
+              router.push('/calling/search');
+            }
+          }
+        ]
+      );
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to start searching');
+      Alert.alert('Oops! 😔', error.message || 'Failed to start searching');
     }
   };
 

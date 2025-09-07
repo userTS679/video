@@ -13,8 +13,9 @@ import { X, Loader } from 'lucide-react-native';
 import { useCallStore } from '@/store/callStore';
 
 export default function SearchScreen() {
-  const [searchText, setSearchText] = useState('Searching for someone awesome...');
+  const [searchText, setSearchText] = useState('Finding your perfect study buddy...');
   const [dots, setDots] = useState('');
+  const [searchTime, setSearchTime] = useState(0);
   const spinValue = new Animated.Value(0);
   
   const { isSearching, stopSearch, currentCall } = useCallStore();
@@ -37,10 +38,11 @@ export default function SearchScreen() {
 
     // Change search text periodically
     const textOptions = [
-      'Searching for someone awesome...',
-      'Finding your next connection...',
-      'Looking for the perfect match...',
-      'Discovering new friends...',
+      'Finding your perfect study buddy... 📚',
+      'Looking for your coffee chat partner... ☕',
+      'Discovering your next best friend... 🤝',
+      'Finding someone with your vibe... ✨',
+      'Connecting you with fellow students... 🎆',
     ];
     
     let textIndex = 0;
@@ -49,10 +51,22 @@ export default function SearchScreen() {
       setSearchText(textOptions[textIndex]);
     }, 3000);
 
+    // Timer for search duration
+    const timer = setInterval(() => {
+      setSearchTime(prev => prev + 1);
+    }, 1000);
+
+    // Simulate finding a match after some time
+    const matchTimeout = setTimeout(() => {
+      router.replace('/calling/video-call');
+    }, Math.random() * 8000 + 7000); // 7-15 seconds
+
     return () => {
       spinAnimation.stop();
       clearInterval(dotInterval);
       clearInterval(textInterval);
+      clearInterval(timer);
+      clearTimeout(matchTimeout);
     };
   }, []);
 
@@ -65,16 +79,16 @@ export default function SearchScreen() {
 
   const handleCancel = () => {
     Alert.alert(
-      'Cancel Search',
-      'Are you sure you want to stop searching?',
+      'Stop Looking? 😢',
+      'Are you sure you want to cancel your search for awesome people?',
       [
-        { text: 'Keep Searching', style: 'cancel' },
+        { text: 'Keep Looking! 🚀', style: 'cancel' },
         { 
-          text: 'Cancel', 
+          text: 'Stop Search', 
           style: 'destructive',
           onPress: () => {
             stopSearch();
-            router.back();
+            router.replace('/(tabs)');
           }
         },
       ]
@@ -108,11 +122,14 @@ export default function SearchScreen() {
             We're finding someone who shares your interests
           </Text>
 
+          <Text style={styles.timer}>🕰️ {Math.floor(searchTime / 60).toString().padStart(2, '0')}:{(searchTime % 60).toString().padStart(2, '0')}</Text>
+
           <View style={styles.tips}>
-            <Text style={styles.tipTitle}>While you wait:</Text>
-            <Text style={styles.tip}>• Make sure you're in a well-lit area</Text>
-            <Text style={styles.tip}>• Check your internet connection</Text>
-            <Text style={styles.tip}>• Think of interesting conversation starters</Text>
+            <Text style={styles.tipTitle}>💡 Pro Tips While You Wait:</Text>
+            <Text style={styles.tip}>• Make sure you're in a well-lit area 💡</Text>
+            <Text style={styles.tip}>• Check your internet connection 📶</Text>
+            <Text style={styles.tip}>• Think of interesting conversation starters 💬</Text>
+            <Text style={styles.tip}>• Be yourself and have fun! 😊</Text>
           </View>
         </View>
       </View>
@@ -123,7 +140,7 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#6B46C1',
   },
   content: {
     flex: 1,
@@ -147,16 +164,16 @@ const styles = StyleSheet.create({
   },
   searchText: {
     fontSize: 24,
-    fontWeight: '600',
-    color: '#ffffff',
+    fontWeight: '800',
+    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 16,
   },
   subtitle: {
     fontSize: 16,
-    color: '#cccccc',
+    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
-    marginBottom: 48,
+    marginBottom: 32,
     lineHeight: 22,
   },
   tips: {
@@ -165,15 +182,22 @@ const styles = StyleSheet.create({
     padding: 24,
     width: '100%',
   },
-  tipTitle: {
+  timer: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#FFE066',
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  tipTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
     marginBottom: 16,
   },
   tip: {
     fontSize: 14,
-    color: '#cccccc',
+    color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: 8,
     lineHeight: 20,
   },

@@ -95,7 +95,7 @@ export default function SignUpScreen() {
     try {
       await signUp(email, password);
       // Additional profile data will be saved after successful signup
-      router.replace('/(auth)/profile-setup');
+      router.replace('/(tabs)');
     } catch (error: any) {
       Alert.alert('Signup Failed 😔', error.message || 'Failed to create account');
     } finally {

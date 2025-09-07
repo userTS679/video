@@ -47,19 +47,20 @@ export default function SignInScreen() {
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to continue connecting</Text>
+          <Text style={styles.emoji}>👋</Text>
+          <Text style={styles.title}>Welcome back!</Text>
+          <Text style={styles.subtitle}>Sign in to continue your journey</Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>📧 Email</Text>
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-              placeholder="your.email@example.com"
-              placeholderTextColor="#999"
+              placeholder="your.email@college.edu"
+              placeholderTextColor="#9CA3AF"
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
@@ -67,13 +68,13 @@ export default function SignInScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>🔒 Password</Text>
             <TextInput
               style={styles.input}
               value={password}
               onChangeText={setPassword}
               placeholder="Enter your password"
-              placeholderTextColor="#999"
+              placeholderTextColor="#9CA3AF"
               secureTextEntry
               autoComplete="current-password"
             />
@@ -85,7 +86,7 @@ export default function SignInScreen() {
             disabled={isLoading}
           >
             <Text style={styles.signInButtonText}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? 'Signing In... ⏳' : 'Sign In 🚀'}
             </Text>
           </TouchableOpacity>
 
@@ -106,26 +107,32 @@ export default function SignInScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FAFBFF',
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: 24,
+    paddingVertical: 40,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: 40,
+  },
+  emoji: {
+    fontSize: 60,
+    marginBottom: 16,
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    fontWeight: '800',
+    color: '#2D1B69',
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#64748B',
     textAlign: 'center',
   },
   form: {
@@ -135,35 +142,45 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   label: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#2D1B69',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 16,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     fontSize: 16,
-    color: '#1a1a1a',
-    borderWidth: 1,
-    borderColor: '#e9ecef',
+    color: '#2D1B69',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    shadowColor: '#6B46C1',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   signInButton: {
-    backgroundColor: '#8B5CF6',
+    backgroundColor: '#FF6B6B',
     paddingVertical: 18,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: 'center',
     marginTop: 8,
+    shadowColor: '#FF6B6B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   disabledButton: {
     opacity: 0.6,
   },
   signInButtonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   footer: {
     flexDirection: 'row',
@@ -173,11 +190,11 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: '#666',
+    color: '#64748B',
   },
   linkText: {
     fontSize: 14,
-    color: '#8B5CF6',
+    color: '#6B46C1',
     fontWeight: '600',
   },
 });
