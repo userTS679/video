@@ -39,7 +39,7 @@ export default function VideoCallScreen() {
   const [showReport, setShowReport] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
-  
+
   const {
     currentCall,
     connectedUser,
@@ -51,14 +51,12 @@ export default function VideoCallScreen() {
     channelName,
     agoraToken,
   } = useCallStore();
-  
+
   const { startGame, isGameActive, gameType } = useGameStore();
 
   useEffect(() => {
-    // Load initial icebreaker
     loadIcebreaker();
-    
-    // Start call duration timer when connected
+
     let timer: NodeJS.Timeout;
     if (isConnected) {
       timer = setInterval(() => {
@@ -101,7 +99,6 @@ export default function VideoCallScreen() {
   };
 
   const loadIcebreaker = async () => {
-    // For now, use predefined college-friendly icebreakers
     const collegeIcebreakers = [
       "What's your major and what made you choose it? 📚",
       "If you could have any superpower during exams, what would it be? ⚡",
@@ -112,7 +109,7 @@ export default function VideoCallScreen() {
       "What's your favorite campus spot to hang out? 🏫",
       "What song always gets you hyped up? 🎵"
     ];
-    
+
     const randomIcebreaker = collegeIcebreakers[Math.floor(Math.random() * collegeIcebreakers.length)];
     setCurrentIcebreaker(randomIcebreaker);
   };
@@ -123,8 +120,8 @@ export default function VideoCallScreen() {
       'Are you sure you want to end this call?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'End Call', 
+        {
+          text: 'End Call',
           style: 'destructive',
           onPress: async () => {
             await endCall();
@@ -167,7 +164,7 @@ export default function VideoCallScreen() {
 
   const handleStartGame = async (gameType: 'rock_paper_scissors' | 'trivia' | 'emoji_guess') => {
     if (!currentCall) return;
-    
+
     try {
       await startGame(gameType, currentCall.id);
       setShowGameMenu(false);
@@ -195,7 +192,7 @@ export default function VideoCallScreen() {
           <Text style={styles.readyText}>
             Your video will be blurred until both of you are ready
           </Text>
-          
+
           <TouchableOpacity
             style={styles.readyButton}
             onPress={() => {
@@ -219,7 +216,7 @@ export default function VideoCallScreen() {
             <Text style={styles.gameMenuClose}>Close</Text>
           </TouchableOpacity>
         </View>
-        
+
         <ScrollView style={styles.gameMenuContent}>
           <TouchableOpacity
             style={styles.gameOption}
@@ -228,7 +225,7 @@ export default function VideoCallScreen() {
             <Text style={styles.gameOptionTitle}>✂️ Rock Paper Scissors</Text>
             <Text style={styles.gameOptionDesc}>Classic game, best of 3 rounds</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.gameOption}
             onPress={() => handleStartGame('trivia')}
@@ -236,7 +233,7 @@ export default function VideoCallScreen() {
             <Text style={styles.gameOptionTitle}>🧠 Quick Trivia</Text>
             <Text style={styles.gameOptionDesc}>3 quick questions, test your knowledge</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.gameOption}
             onPress={() => handleStartGame('emoji_guess')}
@@ -258,7 +255,7 @@ export default function VideoCallScreen() {
             <Text style={styles.reportModalClose}>Cancel</Text>
           </TouchableOpacity>
         </View>
-        
+
         <ScrollView style={styles.reportModalContent}>
           {[
             'Inappropriate behavior',
@@ -298,24 +295,19 @@ export default function VideoCallScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      
-      {/* Video Views */}
-      <View style={styles.videoContainer}>
-        {/* Remote Video (Main) */}
-        <View style={[styles.remoteVideo, !bothReady && styles.blurredVideo]}>
-          <Text style={styles.videoPlaceholder}>
-            {connectedUser.display_name}'s video
-            {!bothReady ? ' (Blurred)' : ''}
-          </Text>
-        </View>
-        
-        {/* Local Video (Small) */}
-        <View style={[styles.localVideo, !bothReady && styles.blurredVideo]}>
-          <Text style={styles.localVideoText}>
-            You{!bothReady ? ' (Blurred)' : ''}
-          </Text>
-        </View>
-      </View>
+
+      {/* Agora Video Call View */}
+      <VideoCallView
+        ref={videoCallRef}
+        channelName={channelName}
+        token={agoraToken}
+        onUserJoined={handleUserJoined}
+        onUserLeft={handleUserLeft}
+        onError={handleCallError}
+        isMuted={isMuted}
+        isVideoOff={isVideoOff}
+        bothReady={bothReady}
+      />
 
       {/* Icebreaker */}
       {currentIcebreaker && bothReady && (
@@ -332,14 +324,14 @@ export default function VideoCallScreen() {
       <View style={styles.controls}>
         <TouchableOpacity
           style={[styles.controlButton, isMuted && styles.activeControl]}
-          onPress={() => setIsMuted(!isMuted)}
+          onPress={toggleMute}
         >
           {isMuted ? <MicOff size={24} color="#ffffff" /> : <Mic size={24} color="#ffffff" />}
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.controlButton, isVideoOff && styles.activeControl]}
-          onPress={() => setIsVideoOff(!isVideoOff)}
+          onPress={toggleVideo}
         >
           {isVideoOff ? <VideoOff size={24} color="#ffffff" /> : <Video size={24} color="#ffffff" />}
         </TouchableOpacity>
@@ -605,7 +597,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 32,
     marginTop: 32,
   },
-  backButtonText: {
+    backButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',

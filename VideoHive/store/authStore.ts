@@ -19,14 +19,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signUp: async (email: string, password: string) => {
     set({ isLoading: true });
-    
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: undefined, // Disable email confirmation for MVP
-        },
+        // options: {},
       });
 
       if (error) throw error;
@@ -45,18 +42,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (profileError) {
           console.error('Error creating profile:', profileError);
         }
+        else {
+  console.log('Profile created successfully');
+}
       }
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
     } finally {
       set({ isLoading: false });
+      await get().initialize(); // <-- Added to update auth state after signup
     }
   },
 
   signIn: async (email: string, password: string) => {
     set({ isLoading: true });
-    
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -69,16 +69,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       throw error;
     } finally {
       set({ isLoading: false });
+      await get().initialize(); // <-- Added to update auth state after signin
     }
   },
 
   signOut: async () => {
     set({ isLoading: true });
-    
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
       set({ user: null, isAuthenticated: false });
     } catch (error) {
       console.error('Sign out error:', error);
@@ -93,7 +92,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!user) throw new Error('No user found');
 
     set({ isLoading: true });
-    
     try {
       const { error } = await supabase
         .from('users')
@@ -112,57 +110,61 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  initialize: async () => {
-    try {
-      set({ isLoading: true });
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        // Fetch user profile
-        const { data: profile, error } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+initialize: async () => {
+  try {
+    set({ isLoading: true });
+    console.log('[Auth] init - env token?', process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ? 'yes' : 'no');
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('[Auth] currentSession:', session);
 
-        if (!error && profile) {
-          set({ 
-            user: profile, 
-            isAuthenticated: true,
-            isLoading: false 
-          });
-          return;
-        }
+    if (session?.user) {
+      const { data: profile, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      console.log('[Auth] profile:', profile);
+
+      if (!error && profile) {
+        set({
+          user: profile,
+          isAuthenticated: true,
+          isLoading: false
+        });
+        console.log('[Auth] set authenticated');
+        return;
       }
-      
-      // No valid session or profile found
-      set({ 
-        user: null, 
-        isAuthenticated: false,
-        isLoading: false 
-      });
-    } catch (error) {
-      console.error('Initialize error:', error);
-      set({ 
-        user: null, 
-        isAuthenticated: false,
-        isLoading: false 
-      });
     }
-  },
+
+    set({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false
+    });
+    console.log('[Auth] set unauthenticated');
+  } catch (error) {
+    console.error('[Auth] Initialize error:', error);
+    set({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false
+    });
+    console.log('[Auth] set unauthenticated (error)');
+  }
+},
 }));
 
 // Listen for auth changes
 supabase.auth.onAuthStateChange(async (event, session) => {
   const { initialize } = useAuthStore.getState();
-  
+
   if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
     await initialize();
   } else if (event === 'SIGNED_OUT') {
-    useAuthStore.setState({ 
-      user: null, 
+    useAuthStore.setState({
+      user: null,
       isAuthenticated: false,
-      isLoading: false 
+          isLoading: false
     });
   }
 });
